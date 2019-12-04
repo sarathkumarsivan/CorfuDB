@@ -14,7 +14,7 @@ import org.corfudb.runtime.MultiCheckpointWriter;
 import org.corfudb.runtime.clients.LogUnitClient;
 import org.corfudb.runtime.clients.SequencerClient;
 import org.corfudb.runtime.collections.CorfuTable;
-import org.corfudb.runtime.collections.SMRMap;
+import org.corfudb.runtime.collections.CorfuTable;
 import org.corfudb.runtime.collections.StreamingMap;
 import org.corfudb.runtime.collections.StringIndexer;
 import org.corfudb.runtime.object.ICorfuSMR;
@@ -376,7 +376,7 @@ public class FastObjectLoaderTest extends AbstractViewTest {
         UUID stream1 = CorfuRuntime.getStreamID(streamName);
 
         CheckpointWriter cpw = new CheckpointWriter(getDefaultRuntime(), stream1,
-                "author", (SMRMap) map);
+                "author", (CorfuTable) map);
         getDefaultRuntime().getObjectsView().TXBuild()
                 .type(TransactionType.SNAPSHOT)
                 .build()
@@ -697,7 +697,7 @@ public class FastObjectLoaderTest extends AbstractViewTest {
         CorfuRuntime originalRuntime = getDefaultRuntime();
 
         Map<String, String> originalMap = originalRuntime.getObjectsView().build()
-                .setTypeToken(new TypeToken<SMRMap<String, String>>() {})
+                .setTypeToken(new TypeToken<CorfuTable<String, String>>() {})
                 .setStreamName("test")
                 .setSerializer(customSerializer)
                 .open();
@@ -714,11 +714,11 @@ public class FastObjectLoaderTest extends AbstractViewTest {
         // because it was already created in the ObjectsView cache
         // with the correct serializer.
         Map<String, String> recreatedMap = recreatedRuntime.getObjectsView().build()
-                .setTypeToken(new TypeToken<SMRMap<String, String>>() {})
+                .setTypeToken(new TypeToken<CorfuTable<String, String>>() {})
                 .setStreamName("test")
                 .open();
 
-        assertThat(Helpers.getCorfuCompileProxy(recreatedRuntime, "test", SMRMap.class).getSerializer()).isEqualTo(customSerializer);
+        assertThat(Helpers.getCorfuCompileProxy(recreatedRuntime, "test", CorfuTable.class).getSerializer()).isEqualTo(customSerializer);
 
     }
 
@@ -821,8 +821,8 @@ public class FastObjectLoaderTest extends AbstractViewTest {
     public void canRecreateMixOfMaps() throws Exception {
         CorfuRuntime originalRuntime = getDefaultRuntime();
 
-        SMRMap smrMap = originalRuntime.getObjectsView().build()
-                .setTypeToken(new TypeToken<SMRMap<String, String>>() {})
+        CorfuTable smrMap = originalRuntime.getObjectsView().build()
+                .setTypeToken(new TypeToken<CorfuTable<String, String>>() {})
                 .setStreamName("smrMap")
                 .open();
 
@@ -837,7 +837,7 @@ public class FastObjectLoaderTest extends AbstractViewTest {
         corfuTable.put("g", "h");
 
         MultiCheckpointWriter mcw = new MultiCheckpointWriter<>();
-        mcw.addMap((SMRMap) smrMap);
+        mcw.addMap((CorfuTable) smrMap);
         mcw.addMap((CorfuTable) corfuTable);
         mcw.appendCheckpoints(getRuntime(), "author");
 
@@ -857,7 +857,7 @@ public class FastObjectLoaderTest extends AbstractViewTest {
         fsmr.loadMaps();
 
 
-        Helpers.assertThatMapIsBuilt(originalRuntime, recreatedRuntime, "smrMap", smrMap, SMRMap.class);
+        Helpers.assertThatMapIsBuilt(originalRuntime, recreatedRuntime, "smrMap", smrMap, CorfuTable.class);
         Helpers.assertThatMapIsBuilt(originalRuntime, recreatedRuntime, "corfuTable", corfuTable, CorfuTable.class);
     }
 

@@ -19,7 +19,6 @@ import org.corfudb.protocols.wireprotocol.ILogData;
 import org.corfudb.runtime.CorfuRuntime;
 import org.corfudb.runtime.collections.CorfuTable;
 import org.corfudb.runtime.collections.Index;
-import org.corfudb.runtime.collections.SMRMap;
 import org.corfudb.runtime.exceptions.FastObjectLoaderException;
 import org.corfudb.runtime.exceptions.TrimmedException;
 import org.corfudb.runtime.exceptions.unrecoverable.UnrecoverableCorfuInterruptedError;
@@ -58,7 +57,7 @@ import static org.corfudb.recovery.RecoveryUtils.getSnapShotAddressOfCheckPoint;
 import static org.corfudb.recovery.RecoveryUtils.getStartAddressOfCheckPoint;
 import static org.corfudb.recovery.RecoveryUtils.isCheckPointEntry;
 
-/** The FastObjectLoader reconstructs the coalesced state of SMRMaps through sequential log read
+/** The FastObjectLoader reconstructs the coalesced state of CorfuTables through sequential log read
  *
  * This utility reads Log entries sequentially extracting the SMRUpdates from each entry
  * and build the Maps as we go. In the presence of checkpoints, the checkpoint entries will
@@ -90,7 +89,7 @@ public class FastObjectLoader {
 
     @Setter
     @Getter
-    Class defaultObjectsType = SMRMap.class;
+    Class defaultObjectsType = CorfuTable.class;
 
     @Setter
     @Getter
@@ -704,7 +703,7 @@ public class FastObjectLoader {
 
     /**
      * This method will use the checkpoints and the entries
-     * after checkpoints to resurrect the SMRMaps
+     * after checkpoints to resurrect the CorfuTables
      */
     private void recoverRuntime() {
         log.info("recoverRuntime: Resurrecting the runtime");
@@ -725,7 +724,7 @@ public class FastObjectLoader {
     }
 
     /**
-     * Entry point to load the SMRMaps in memory.
+     * Entry point to load the CorfuTables in memory.
      *
      * When this function returns, the maps are fully loaded.
      */

@@ -7,7 +7,7 @@ import org.corfudb.protocols.wireprotocol.LogData;
 import org.corfudb.protocols.wireprotocol.Token;
 import org.corfudb.runtime.CorfuRuntime;
 import org.corfudb.runtime.collections.CorfuTable;
-import org.corfudb.runtime.collections.SMRMap;
+import org.corfudb.runtime.collections.CorfuTable;
 import org.corfudb.runtime.collections.StreamingMap;
 import org.corfudb.runtime.object.CorfuCompileProxy;
 import org.corfudb.runtime.object.ICorfuSMR;
@@ -31,7 +31,7 @@ public class Helpers{
     }
 
     static StreamingMap<String, String> createMap(String streamName, CorfuRuntime cr) {
-        return createMap(streamName, cr, SMRMap.class);
+        return createMap(streamName, cr, CorfuTable.class);
     }
 
     static <T extends ICorfuSMR> StreamingMap<

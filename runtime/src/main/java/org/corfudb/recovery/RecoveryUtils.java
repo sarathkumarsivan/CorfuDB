@@ -48,7 +48,7 @@ public class RecoveryUtils {
     }
 
     /**
-     * Create a new object SMRMap as recipient of SMRUpdates (if doesn't exist yet)
+     * Create a new object CorfuTable as recipient of SMRUpdates (if doesn't exist yet)
      */
     static void createObjectIfNotExist(CorfuRuntime runtime, UUID streamId, ISerializer serializer, Class type) {
         if (!runtime.getObjectsView().getObjectCache()
