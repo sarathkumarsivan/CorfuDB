@@ -32,11 +32,13 @@ import org.slf4j.event.Level;
 
 import java.nio.file.Paths;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.stream.Collectors;
 
 /**
  * Fixture factory provides predefined fixtures
@@ -142,15 +144,14 @@ public interface Fixtures {
 
         private final FixtureUtilBuilder fixtureUtilBuilder = FixtureUtil.builder();
 
+        private final Properties vmProperties = VmConfigPropertiesLoader
+                .loadVmProperties()
+                .get();
+
         public VmUniverseFixture() {
             Properties credentials = VmConfigPropertiesLoader
                     .loadVmCredentialsProperties()
-                    //empty
                     .orElse(new Properties());
-
-            Properties vmProperties = VmConfigPropertiesLoader
-                    .loadVmProperties()
-                    .get();
 
             servers
                     .logLevel(Level.INFO)
@@ -175,10 +176,15 @@ public interface Fixtures {
                     .vmCredentials(vmCred)
                     .build();
 
+            List<String> vSphereHost = Arrays
+                    .stream(vmProperties.getProperty("vsphere.host").split(","))
+                    .collect(Collectors.toList());
+
             universe = VmUniverseParams.builder()
                     .vSphereUrl(vmProperties.getProperty("vsphere.url"))
+                    .vSphereHost(vSphereHost)
                     .networkName(vmProperties.getProperty("vm.network"))
-                    .templateVMName("debian-buster-thin-provisioned")
+                    .templateVMName(vmProperties.getProperty("vm.template", "debian-buster-thin-provisioned"))
                     .credentials(credentialParams)
                     .cleanUpEnabled(true);
         }
@@ -188,6 +194,8 @@ public interface Fixtures {
             if (data.isPresent()) {
                 return data.get();
             }
+
+            vmPrefix = vmProperties.getProperty("vm.prefix", vmPrefix);
 
             CorfuClusterParams clusterParams = cluster.build();
 

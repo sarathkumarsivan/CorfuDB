@@ -197,6 +197,7 @@ public class ApplianceManager {
                     .vm(vm)
                     .vmName(vmName)
                     .serviceInstance(si)
+                    .universeParams(universeParams)
                     .build();
 
             vmManager.powerOn().get();

@@ -27,6 +27,7 @@ import java.util.List;
 public class VmCorfuServer extends AbstractCorfuServer<VmCorfuServerParams, VmUniverseParams> {
 
     @NonNull
+    @Getter
     private final VmManager vm;
 
     @NonNull
