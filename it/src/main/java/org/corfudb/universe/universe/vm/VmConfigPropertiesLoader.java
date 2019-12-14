@@ -16,12 +16,12 @@ import java.util.Properties;
 @Slf4j
 public class VmConfigPropertiesLoader {
 
+    public static final Path VM_PROPERTIES = Paths.get("vm.properties");
+    public static final Path VM_CREDENTIALS = Paths.get("vm.credentials.properties");
+
     private VmConfigPropertiesLoader() {
         //prevent creating instances
     }
-
-    public static final Path VM_PROPERTIES = Paths.get("vm.properties");
-    public static final Path VM_CREDENTIALS = Paths.get("vm.credentials.properties");
 
     public static Result<Properties, PropsLoaderException> loadVmProperties() {
         return Result.of(() -> loadPropertiesFile(VM_PROPERTIES));
