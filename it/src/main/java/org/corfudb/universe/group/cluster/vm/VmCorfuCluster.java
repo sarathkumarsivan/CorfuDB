@@ -51,24 +51,24 @@ public class VmCorfuCluster extends AbstractCorfuCluster<VmCorfuServerParams, Vm
         log.info("Deploy corfu server: {}", nodeParams);
         VmCorfuServerParams params = getVmServerParams(nodeParams);
 
-        VmManager vm = vms.get(params.getVmName());
+        VmManager vmManager = vms.get(params.getVmName());
 
         RemoteOperationHelper commandHelper = RemoteOperationHelper.builder()
-                .ipAddress(vm.getResolvedIpAddress())
+                .ipAddress(vmManager.getResolvedIpAddress())
                 .credentials(universeParams.getCredentials().getVmCredentials())
                 .build();
 
         VmStress stress = VmStress.builder()
                 .params(params)
                 .universeParams(universeParams)
-                .vmManager(vm)
+                .vmManager(vmManager)
                 .commandHelper(commandHelper)
                 .build();
 
         return VmCorfuServer.builder()
                 .universeParams(universeParams)
                 .params(params)
-                .vm(vm)
+                .vmManager(vmManager)
                 .stress(stress)
                 .remoteOperationHelper(commandHelper)
                 .build();
