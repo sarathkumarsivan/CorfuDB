@@ -28,7 +28,7 @@ public class VmCorfuServer extends AbstractCorfuServer<VmCorfuServerParams, VmUn
 
     @NonNull
     @Getter
-    private final VmManager vm;
+    private final VmManager vmManager;
 
     @NonNull
     private final IpAddress ipAddress;
@@ -45,10 +45,10 @@ public class VmCorfuServer extends AbstractCorfuServer<VmCorfuServerParams, VmUn
 
     @Builder
     public VmCorfuServer(
-            VmCorfuServerParams params, VmManager vm, VmUniverseParams universeParams,
+            VmCorfuServerParams params, VmManager vmManager, VmUniverseParams universeParams,
             VmStress stress, RemoteOperationHelper remoteOperationHelper) {
         super(params, universeParams);
-        this.vm = vm;
+        this.vmManager = vmManager;
         this.ipAddress = getIpAddress();
         this.stress = stress;
         this.remoteOperationHelper = remoteOperationHelper;
@@ -206,7 +206,7 @@ public class VmCorfuServer extends AbstractCorfuServer<VmCorfuServerParams, VmUn
      */
     @Override
     public IpAddress getIpAddress() {
-        return vm.getResolvedIpAddress();
+        return vmManager.getResolvedIpAddress();
     }
 
     /**
