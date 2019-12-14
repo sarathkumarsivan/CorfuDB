@@ -66,7 +66,7 @@ public interface Fixtures {
         public static final int DEFAULT_WAIT_POLL_ITER = 300;
 
         // Default time to wait before next layout poll: 1 second
-        public static final int DEFAULT_WAIT_TIME = 1;
+        public static final Duration DEFAULT_WAIT_TIME = Duration.ofSeconds(1);
     }
 
     @Getter
@@ -74,7 +74,8 @@ public interface Fixtures {
 
         private final UniverseParamsBuilder universe = UniverseParams.universeBuilder();
 
-        private final CorfuClusterParamsBuilder cluster = CorfuClusterParams.builder();
+        private final CorfuClusterParamsBuilder<CorfuServerParams> cluster = CorfuClusterParams
+                .builder();
 
         private final CorfuServerParamsBuilder server = CorfuServerParams.serverParamsBuilder();
 
@@ -99,7 +100,7 @@ public interface Fixtures {
             }
 
             UniverseParams universeParams = universe.build();
-            CorfuClusterParams clusterParams = cluster.build();
+            CorfuClusterParams<CorfuServerParams> clusterParams = cluster.build();
 
             SupportClusterParams monitoringClusterParams = monitoringCluster.build();
             SupportServerParams monitoringServerParams = supportServer
@@ -131,7 +132,8 @@ public interface Fixtures {
 
         private final VmUniverseParamsBuilder universe;
 
-        private final CorfuClusterParamsBuilder cluster = CorfuClusterParams.builder();
+        private final CorfuClusterParamsBuilder<VmCorfuServerParams> cluster = CorfuClusterParams
+                .builder();
 
         private final VmCorfuServerParamsBuilder servers = VmCorfuServerParams.builder();
 
@@ -198,10 +200,10 @@ public interface Fixtures {
 
             vmPrefix = vmProperties.getProperty("vm.prefix", vmPrefix);
 
-            CorfuClusterParams clusterParams = cluster.build();
+            CorfuClusterParams<VmCorfuServerParams> clusterParams = cluster.build();
 
             FixtureUtil fixtureUtil = fixtureUtilBuilder.build();
-            ImmutableList<CorfuServerParams> serversParams = fixtureUtil.buildVmServers(
+            ImmutableList<VmCorfuServerParams> serversParams = fixtureUtil.buildVmServers(
                     clusterParams, servers, vmPrefix
             );
             serversParams.forEach(clusterParams::add);

@@ -36,7 +36,7 @@ public class FixtureUtil {
      * @return list of docker corfu server params
      */
     ImmutableList<CorfuServerParams> buildServers(
-            CorfuClusterParams cluster, CorfuServerParamsBuilder serverBuilder) {
+            CorfuClusterParams<CorfuServerParams> cluster, CorfuServerParamsBuilder serverBuilder) {
 
         currPort = initialPort;
 
@@ -64,13 +64,13 @@ public class FixtureUtil {
      * @param serverParamsBuilder corfu server builder with predefined parameters
      * @return list of VM corfu server params
      */
-    ImmutableList<CorfuServerParams> buildVmServers(
-            CorfuClusterParams cluster, VmCorfuServerParamsBuilder serverParamsBuilder,
-            String vmNamePrefix) {
+    ImmutableList<VmCorfuServerParams> buildVmServers(
+            CorfuClusterParams<VmCorfuServerParams> cluster,
+            VmCorfuServerParamsBuilder serverParamsBuilder, String vmNamePrefix) {
 
         currPort = initialPort;
 
-        List<CorfuServerParams> serversParams = new ArrayList<>();
+        List<VmCorfuServerParams> serversParams = new ArrayList<>();
 
         for (int i = 0; i < cluster.getNumNodes(); i++) {
             int port = getPort();
