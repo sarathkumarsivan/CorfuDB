@@ -10,6 +10,7 @@ import org.corfudb.universe.node.server.CorfuServerParams.CorfuServerParamsBuild
 import org.corfudb.universe.node.server.ServerUtil;
 import org.corfudb.universe.node.server.vm.VmCorfuServerParams;
 import org.corfudb.universe.node.server.vm.VmCorfuServerParams.VmCorfuServerParamsBuilder;
+import org.corfudb.universe.node.server.vm.VmCorfuServerParams.VmName;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,9 +75,14 @@ public class FixtureUtil {
         for (int i = 0; i < cluster.getNumNodes(); i++) {
             int port = getPort();
 
+            VmName vmName = VmName.builder()
+                    .name(vmNamePrefix + (i + 1))
+                    .index(i)
+                    .build();
+
             VmCorfuServerParams serverParam = serverParamsBuilder
                     .clusterName(cluster.getName())
-                    .vmName(VmCorfuServerParams.VmName.builder().name(vmNamePrefix + (i + 1)).build() )
+                    .vmName(vmName)
                     .port(port)
                     .serverVersion(cluster.getServerVersion())
                     .build();

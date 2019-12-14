@@ -10,7 +10,7 @@ import org.corfudb.universe.node.server.AbstractCorfuServer;
 import org.corfudb.universe.node.server.CorfuServer;
 import org.corfudb.universe.node.server.process.CorfuProcessManager;
 import org.corfudb.universe.node.stress.vm.VmStress;
-import org.corfudb.universe.universe.vm.ApplianceManager.VmManager;
+import org.corfudb.universe.universe.vm.VmManager;
 import org.corfudb.universe.universe.vm.VmUniverseParams;
 import org.corfudb.universe.util.IpAddress;
 import org.corfudb.universe.util.IpTablesUtil;
@@ -64,6 +64,8 @@ public class VmCorfuServer extends AbstractCorfuServer<VmCorfuServerParams, VmUn
      */
     @Override
     public CorfuServer deploy() {
+        log.info("Deploy vm server: {}", params.getVmName());
+
         executeCommand(processManager.createServerDirCommand());
         executeCommand(processManager.createStreamLogDirCommand());
 

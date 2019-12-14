@@ -159,7 +159,8 @@ public interface Fixtures {
                     .persistence(CorfuServer.Persistence.DISK)
                     .stopTimeout(Duration.ofSeconds(1))
                     .serverJarDirectory(Paths.get("target"))
-                    .dockerImage(CorfuServerParams.DOCKER_IMAGE_NAME);
+                    .dockerImage(CorfuServerParams.DOCKER_IMAGE_NAME)
+                    .logSizeQuotaPercentage(100);
 
             Credentials vSphereCred = Credentials.builder()
                     .username(credentials.getProperty("vsphere.username"))
@@ -207,7 +208,11 @@ public interface Fixtures {
 
             ConcurrentMap<VmName, IpAddress> vmIpAddresses = new ConcurrentHashMap<>();
             for (int i = 0; i < clusterParams.getNumNodes(); i++) {
-                vmIpAddresses.put(VmName.builder().name(vmPrefix + (i + 1)).build(), ANY_ADDRESS);
+                VmName vmName = VmName.builder()
+                        .name(vmPrefix + (i + 1))
+                        .index(i)
+                        .build();
+                vmIpAddresses.put(vmName, ANY_ADDRESS);
             }
 
             VmUniverseParams universeParams = universe
