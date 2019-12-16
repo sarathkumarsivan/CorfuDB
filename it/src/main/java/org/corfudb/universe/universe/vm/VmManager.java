@@ -114,8 +114,8 @@ public class VmManager {
         log.info("Getting IP address for {} from DHCP...please wait...", vmName);
 
         return CompletableFuture.supplyAsync(() -> {
-            IpAddress ipAddress = null;
-            while (ipAddress == null) {
+            Optional<String> ipAddress = Optional.empty();
+            while (!ipAddress.isPresent()) {
                 log.info("Waiting for ip address. Vm: {}", vmName);
 
                 try {
@@ -124,11 +124,11 @@ public class VmManager {
                     Thread.currentThread().interrupt();
                     throw new UniverseException("Error ", e);
                 }
-                GuestInfo guest = getVm().get().getGuest();
-                ipAddress = IpAddress.builder().ip(guest.getIpAddress()).build();
+                GuestInfo guest = getVm().map(VirtualMachine::getGuest).get();
+                ipAddress = Optional.ofNullable(guest.getIpAddress());
             }
 
-            return ipAddress;
+            return IpAddress.builder().ip(ipAddress.get()).build();
         });
     }
 
