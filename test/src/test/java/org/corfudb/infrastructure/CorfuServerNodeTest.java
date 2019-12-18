@@ -46,7 +46,6 @@ public class CorfuServerNodeTest extends AbstractCorfuTest {
         NodeLocator locator = NodeLocator.parseString(connectionString);
         return CorfuRuntime.CorfuRuntimeParameters.builder()
             .layoutServer(locator)
-            .useFastLoader(false)
             .cacheDisabled(true)
             .priorityLevel(PriorityLevel.HIGH)
             .build();
