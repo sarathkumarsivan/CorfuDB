@@ -64,7 +64,7 @@ public class FixtureUtil {
      * @param serverParamsBuilder corfu server builder with predefined parameters
      * @return list of VM corfu server params
      */
-    ImmutableList<VmCorfuServerParams> buildVmServers(
+    protected ImmutableList<VmCorfuServerParams> buildVmServers(
             CorfuClusterParams<VmCorfuServerParams> cluster,
             VmCorfuServerParamsBuilder serverParamsBuilder, String vmNamePrefix) {
 

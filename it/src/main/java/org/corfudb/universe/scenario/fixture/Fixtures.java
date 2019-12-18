@@ -52,10 +52,6 @@ public interface Fixtures {
      */
     class TestFixtureConst {
 
-        private TestFixtureConst() {
-            // prevent instantiation of this class
-        }
-
         // Default name of the CorfuTable created by CorfuClient
         public static final String DEFAULT_STREAM_NAME = "stream";
 
@@ -67,6 +63,10 @@ public interface Fixtures {
 
         // Default time to wait before next layout poll: 1 second
         public static final Duration DEFAULT_WAIT_TIME = Duration.ofSeconds(1);
+
+        private TestFixtureConst() {
+            // prevent instantiation of this class
+        }
     }
 
     @Getter
