@@ -18,7 +18,7 @@ import org.corfudb.protocols.wireprotocol.DataType;
 import org.corfudb.protocols.wireprotocol.ILogData;
 import org.corfudb.runtime.CorfuRuntime;
 import org.corfudb.runtime.collections.CorfuTable;
-import org.corfudb.runtime.collections.CorfuTable.IndexRegistry;
+import org.corfudb.runtime.collections.Index;
 import org.corfudb.runtime.collections.SMRMap;
 import org.corfudb.runtime.exceptions.FastObjectLoaderException;
 import org.corfudb.runtime.exceptions.TrimmedException;
@@ -39,6 +39,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CompletableFuture;
@@ -183,7 +184,7 @@ public class FastObjectLoader {
      * @param streamName    Stream name.
      * @param indexRegistry Index Registry.
      */
-    public void addIndexerToCorfuTableStream(String streamName, IndexRegistry indexRegistry) {
+    public void addIndexerToCorfuTableStream(String streamName, Index.Registry indexRegistry) {
         UUID streamId = CorfuRuntime.getStreamID(streamName);
         Builder ob = SMRObject.builder()
                 .runtime(runtime)
@@ -757,8 +758,9 @@ public class FastObjectLoader {
                 ContiguousSet<Long> addresses = ContiguousSet.create(
                         Range.closed(lower, upper), DiscreteDomain.longs());
 
-                Map<Long, ILogData> range = runtime.getAddressSpaceView().read(addresses,
-                        RecoveryUtils.fastLoaderReadOptions);
+                Map<Long, ILogData> range = new TreeMap<>(
+                        runtime.getAddressSpaceView().read(addresses,
+                                RecoveryUtils.fastLoaderReadOptions));
 
                 // Sanity
                 for (Map.Entry<Long, ILogData> entry : range.entrySet()) {
