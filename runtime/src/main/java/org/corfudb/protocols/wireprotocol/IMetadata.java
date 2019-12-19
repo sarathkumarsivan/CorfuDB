@@ -20,6 +20,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 
+import org.corfudb.common.compression.Codec;
 import org.corfudb.protocols.logprotocol.CheckpointEntry;
 import org.corfudb.runtime.view.Address;
 import org.corfudb.runtime.view.Layout;
@@ -206,6 +207,26 @@ public interface IMetadata {
         getMetadataMap().put(CHECKPOINTED_STREAM_START_LOG_ADDRESS, startLogAddress);
     }
 
+    default void setPayloadCodecType(Codec.Type type) {
+        getMetadataMap().put(LogUnitMetadataType.PAYLOAD_CODEC, type);
+    }
+
+    default Codec.Type getPayloadCodecType() {
+        return (Codec.Type) getMetadataMap().getOrDefault(LogUnitMetadataType.PAYLOAD_CODEC, Codec.Type.NONE);
+    }
+
+    default boolean hasPayloadCodec() {
+        return getPayloadCodecType() != Codec.Type.NONE;
+    }
+
+    default boolean isCompressed() {
+        return (boolean) getMetadataMap().getOrDefault(LogUnitMetadataType.COMPRESSED, false);
+    }
+
+    default void setCompressedFlag() {
+        getMetadataMap().put(LogUnitMetadataType.COMPRESSED, true);
+    }
+
     @RequiredArgsConstructor
     enum LogUnitMetadataType implements ITypedEnum {
         RANK(1, TypeToken.of(DataRank.class)),
@@ -217,7 +238,9 @@ public interface IMetadata {
         CHECKPOINTED_STREAM_START_LOG_ADDRESS(9, TypeToken.of(Long.class)),
         CLIENT_ID(10, TypeToken.of(UUID.class)),
         THREAD_ID(11, TypeToken.of(Long.class)),
-        EPOCH(12, TypeToken.of(Long.class))
+        EPOCH(12, TypeToken.of(Long.class)),
+        PAYLOAD_CODEC(13, TypeToken.of(Codec.Type.class)),
+        COMPRESSED(14, TypeToken.of(Boolean.class))
         ;
         final int type;
         @Getter

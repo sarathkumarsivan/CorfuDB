@@ -136,6 +136,11 @@ public interface ILogData extends IMetadata, Comparable<ILogData> {
     }
 
     /**
+     * Return true if this LogData contains data
+     */
+    default boolean isData() { return  getType() == DataType.DATA; }
+
+    /**
      * Return the serialized size of an object
      *
      * @param obj the entry's payload object

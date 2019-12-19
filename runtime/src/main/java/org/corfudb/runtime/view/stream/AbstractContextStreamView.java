@@ -9,6 +9,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.corfudb.common.compression.Codec;
 import org.corfudb.protocols.wireprotocol.DataType;
 import org.corfudb.protocols.wireprotocol.ILogData;
 import org.corfudb.runtime.CorfuRuntime;
@@ -57,6 +58,8 @@ public abstract class AbstractContextStreamView<T extends AbstractStreamContext>
     /** The base context, which is always preserved. */
     final T baseContext;
 
+    final protected Codec.Type codecType;
+
     /** Create a new abstract context stream view.
      *
      * @param runtime               The runtime.
@@ -71,6 +74,7 @@ public abstract class AbstractContextStreamView<T extends AbstractStreamContext>
                                              contextFactory) {
         this.id = id;
         this.runtime = runtime;
+        this.codecType = Codec.Type.valueOf(runtime.getParameters().getCodecType());
         this.streamContexts = new TreeSet<>();
         this.contextFactory = contextFactory;
         this.baseContext = contextFactory.apply(id, Address.MAX);

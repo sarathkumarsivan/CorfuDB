@@ -3,6 +3,7 @@ package org.corfudb.protocols.wireprotocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.EnumMap;
 import java.util.concurrent.atomic.AtomicReference;
@@ -72,29 +73,38 @@ public class LogData implements ICorfuPayload<LogData>, IMetadata, ILogData {
                     if (data == null) {
                         this.payload.set(null);
                     } else {
-                            ByteBuf copyBuf = Unpooled.wrappedBuffer(data);
-                            final Object actualValue;
-                            try {
-                                actualValue =
-                                        Serializers.CORFU.deserialize(copyBuf, runtime);
-                            } catch (Throwable throwable) {
-                                log.error("Exception caught at address {}, {}, {}",
-                                        getGlobalAddress(), getStreams(), getType());
-                                log.error("Raw data buffer {}",
-                                        copyBuf.resetReaderIndex().toString(Charset.defaultCharset()));
-                                copyBuf.release();
-                                data = null;
-                                throw throwable;
-                            }
-                            if (actualValue instanceof LogEntry) {
-                                ((LogEntry) actualValue).setGlobalAddress(getGlobalAddress());
-                                ((LogEntry) actualValue).setRuntime(runtime);
-                            }
-                            value = actualValue == null ? this.payload : actualValue;
-                            this.payload.set(value);
+                        ByteBuf copyBuf = Unpooled.wrappedBuffer(data);
+                        if (hasPayloadCodec()) {
+                            // if the payload has a codec we need to decode it before deserialization
+                            ByteBuf temp = ICorfuPayload.fromBuffer(data, ByteBuf.class);
+                            byte[] temp2 = new byte[temp.readableBytes()];
+                            temp.readBytes(temp2);
+                            copyBuf = Unpooled.wrappedBuffer(getPayloadCodecType()
+                                    .getInstance().decompress(ByteBuffer.wrap(temp2)));
+                        }
+
+                        final Object actualValue;
+                        try {
+                            actualValue =
+                                    Serializers.CORFU.deserialize(copyBuf, runtime);
+                        } catch (Throwable throwable) {
+                            log.error("Exception caught at address {}, {}, {}",
+                                    getGlobalAddress(), getStreams(), getType());
+                            log.error("Raw data buffer {}",
+                                    copyBuf.resetReaderIndex().toString(Charset.defaultCharset()));
                             copyBuf.release();
-                            lastKnownSize = data.length;
                             data = null;
+                            throw throwable;
+                        }
+                        if (actualValue instanceof LogEntry) {
+                            ((LogEntry) actualValue).setGlobalAddress(getGlobalAddress());
+                            ((LogEntry) actualValue).setRuntime(runtime);
+                        }
+                        value = actualValue == null ? this.payload : actualValue;
+                        this.payload.set(value);
+                        copyBuf.release();
+                        lastKnownSize = data.length;
+                        data = null;
                     }
                 }
             }
@@ -242,15 +252,36 @@ public class LogData implements ICorfuPayload<LogData>, IMetadata, ILogData {
             if (data == null) {
                 int lengthIndex = buf.writerIndex();
                 buf.writeInt(0);
-                Serializers.CORFU.serialize(payload.get(), buf);
+                if (hasPayloadCodec()) {
+                    // if the payload has a codec we need to also compress the payload
+                    ByteBuf serializeBuf =  Unpooled.buffer();
+                    Serializers.CORFU.serialize(payload.get(), serializeBuf);
+                    ByteBuffer wrappedByteBuf = ByteBuffer.wrap(serializeBuf.array(), 0, serializeBuf.readableBytes());
+                    ByteBuffer compressedBuf = getPayloadCodecType().getInstance().compress(wrappedByteBuf);
+                    ICorfuPayload.serialize(buf, Unpooled.wrappedBuffer(compressedBuf));
+                    // Since the server uses the same serialization/deserialization path
+                    // we need a flag to let the server not re-encode an already encoded payload
+                    setCompressedFlag();
+                } else {
+                    Serializers.CORFU.serialize(payload.get(), buf);
+                }
                 int size = buf.writerIndex() - (lengthIndex + 4);
                 buf.writerIndex(lengthIndex);
                 buf.writeInt(size);
                 buf.writerIndex(lengthIndex + size + 4);
             } else {
-                ICorfuPayload.serialize(buf, data);
+                if (hasPayloadCodec() && !isCompressed()) {
+                    // Since the server uses the same serialization/deserialization path
+                    // we need a flag to let the server not re-encode an already encoded payload
+                    ByteBuffer compressedBuf = getPayloadCodecType().getInstance().compress(ByteBuffer.wrap(data));
+                    ICorfuPayload.serialize(buf, Unpooled.wrappedBuffer(compressedBuf));
+                    setCompressedFlag();
+                } else {
+                    ICorfuPayload.serialize(buf, data);
+                }
             }
         }
+
         if (type.isMetadataAware()) {
             ICorfuPayload.serialize(buf, metadataMap);
         }

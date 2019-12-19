@@ -14,6 +14,7 @@ import lombok.ToString;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.corfudb.comm.ChannelImplementation;
+import org.corfudb.common.compression.Codec;
 import org.corfudb.protocols.wireprotocol.MsgHandlingFilter;
 import org.corfudb.protocols.wireprotocol.PriorityLevel;
 import org.corfudb.protocols.wireprotocol.VersionInfo;
@@ -476,6 +477,12 @@ public class CorfuRuntime {
          */
         @Default
         int prometheusMetricsPort = MetricsUtils.NO_METRICS_PORT;
+
+        /**
+         * The compression codec to use to encode a write's payload
+         */
+        @Default
+        String codecType = Codec.Type.ZSTD.toString();
     }
 
     /**

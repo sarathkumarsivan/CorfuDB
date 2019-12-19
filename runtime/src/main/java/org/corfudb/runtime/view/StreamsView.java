@@ -3,6 +3,7 @@ package org.corfudb.runtime.view;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.corfudb.common.compression.Codec;
 import org.corfudb.protocols.wireprotocol.DataType;
 import org.corfudb.protocols.wireprotocol.ILogData;
 import org.corfudb.protocols.wireprotocol.LogData;
@@ -46,8 +47,14 @@ public class StreamsView extends AbstractView {
      */
     private List<IStreamView> openedStreams = new CopyOnWriteArrayList<>();
 
+    /**
+     * The compression codec used to compress a stream's append payload
+     */
+    private final Codec.Type codec;
+
     public StreamsView(final CorfuRuntime runtime) {
         super(runtime);
+        codec = Codec.Type.valueOf(runtime.getParameters().getCodecType());
     }
 
     /**
@@ -133,6 +140,9 @@ public class StreamsView extends AbstractView {
                        @Nonnull CacheOption cacheOption, @Nonnull UUID... streamIDs) {
 
         final LogData ld = new LogData(DataType.DATA, object);
+        if (codec != Codec.Type.NONE) {
+            ld.setPayloadCodecType(this.codec);
+        }
         ld.checkMaxWriteSize(runtime.getParameters().getMaxWriteSize());
 
         TokenResponse tokenResponse = null;

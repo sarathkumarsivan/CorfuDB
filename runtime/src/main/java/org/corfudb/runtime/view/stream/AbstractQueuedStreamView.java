@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import org.corfudb.common.compression.Codec;
 import org.corfudb.protocols.logprotocol.CheckpointEntry;
 import org.corfudb.protocols.wireprotocol.DataType;
 import org.corfudb.protocols.wireprotocol.ILogData;
@@ -174,6 +175,9 @@ public abstract class AbstractQueuedStreamView extends
                        Function<TokenResponse, Boolean> acquisitionCallback,
                        Function<TokenResponse, Boolean> deacquisitionCallback) {
         final LogData ld = new LogData(DataType.DATA, object);
+        if (codecType != Codec.Type.NONE) {
+            ld.setPayloadCodecType(this.codecType);
+        }
         // Validate if the  size of the log data is under max write size.
         ld.checkMaxWriteSize(runtime.getParameters().getMaxWriteSize());
 

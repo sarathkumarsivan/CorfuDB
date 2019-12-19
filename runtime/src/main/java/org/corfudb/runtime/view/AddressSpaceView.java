@@ -12,6 +12,7 @@ import com.google.common.util.concurrent.UncheckedExecutionException;
 import io.netty.handler.timeout.TimeoutException;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.corfudb.common.compression.Codec;
 import org.corfudb.protocols.wireprotocol.DataType;
 import org.corfudb.protocols.wireprotocol.ILogData;
 import org.corfudb.protocols.wireprotocol.IToken;
@@ -193,6 +194,9 @@ public class AddressSpaceView extends AbstractView {
         } else {
             ld = new LogData(DataType.DATA, data);
         }
+
+        // This write method should only accept LogData without the token and Object types.
+        ld.setPayloadCodecType(Codec.Type.valueOf(runtime.getParameters().getCodecType()));
 
         layoutHelper(e -> {
             Layout l = e.getLayout();
