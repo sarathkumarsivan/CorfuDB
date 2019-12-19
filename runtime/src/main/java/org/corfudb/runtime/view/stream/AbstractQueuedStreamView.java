@@ -199,9 +199,9 @@ public abstract class AbstractQueuedStreamView extends
             // Now, we do the actual write. We could get an overwrite
             // exception here - any other exception we should pass up
             // to the client.
-            try {
-                ld.useToken(tokenResponse);
-                runtime.getAddressSpaceView().write(ld);
+            ld.useToken(tokenResponse);
+            try (ILogData.SerializationHandle handle = ld.getSerializedForm()) {
+                runtime.getAddressSpaceView().write(handle.getSerialized());
                 // The write completed successfully, so we return this
                 // address to the client.
                 return tokenResponse.getToken().getSequence();

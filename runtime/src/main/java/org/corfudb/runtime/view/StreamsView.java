@@ -148,10 +148,12 @@ public class StreamsView extends AbstractView {
                         TransactionalContext.getCurrentContext());
             }
 
-            try {
+            // the token needs to be set before a serialization handle is generated
+            ld.useToken(tokenResponse);
+
+            try (ILogData.SerializationHandle handle = ld.getSerializedForm()) {
                 // Attempt to write to the log.
-                ld.useToken(tokenResponse);
-                runtime.getAddressSpaceView().write(ld, cacheOption);
+                runtime.getAddressSpaceView().write(handle.getSerialized(), cacheOption);
                 // If we're here, we succeeded, return the acquired token.
                 return tokenResponse.getSequence();
             } catch (OverwriteException oe) {
