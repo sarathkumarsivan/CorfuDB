@@ -150,7 +150,8 @@ public class StreamsView extends AbstractView {
 
             try {
                 // Attempt to write to the log.
-                runtime.getAddressSpaceView().write(tokenResponse, ld, cacheOption);
+                ld.useToken(tokenResponse);
+                runtime.getAddressSpaceView().write(ld, cacheOption);
                 // If we're here, we succeeded, return the acquired token.
                 return tokenResponse.getSequence();
             } catch (OverwriteException oe) {

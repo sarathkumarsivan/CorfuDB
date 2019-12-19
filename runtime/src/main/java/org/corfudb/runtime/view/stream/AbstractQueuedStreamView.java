@@ -200,7 +200,8 @@ public abstract class AbstractQueuedStreamView extends
             // exception here - any other exception we should pass up
             // to the client.
             try {
-                runtime.getAddressSpaceView().write(tokenResponse, ld);
+                ld.useToken(tokenResponse);
+                runtime.getAddressSpaceView().write(ld);
                 // The write completed successfully, so we return this
                 // address to the client.
                 return tokenResponse.getToken().getSequence();
