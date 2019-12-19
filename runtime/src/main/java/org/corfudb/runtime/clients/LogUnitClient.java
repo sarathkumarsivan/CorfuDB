@@ -72,20 +72,17 @@ public class LogUnitClient extends AbstractClient {
      * Asynchronously write to the logging unit.
      *
      * @param address        the address to write to.
-     * @param rank           the rank of this write (used for quorum replication).
      * @param writeObject    the object, pre-serialization, to write.
      * @param backpointerMap the map of backpointers to write.
      * @return a completable future which returns true on success.
      */
     public CompletableFuture<Boolean> write(long address,
-                                            IMetadata.DataRank rank,
                                             Object writeObject,
                                             Map<UUID, Long> backpointerMap) {
         Timer.Context context = getTimerContext("writeObject");
         ByteBuf payload = Unpooled.buffer();
         Serializers.CORFU.serialize(writeObject, payload);
         WriteRequest wr = new WriteRequest(DataType.DATA, payload);
-        wr.setRank(rank);
         wr.setBackpointerMap(backpointerMap);
         wr.setGlobalAddress(address);
         CompletableFuture<Boolean> cf = sendMessageWithFuture(CorfuMsgType.WRITE.payloadMsg(wr));

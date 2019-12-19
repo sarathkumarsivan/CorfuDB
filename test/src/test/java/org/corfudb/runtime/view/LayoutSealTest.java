@@ -164,7 +164,7 @@ public class LayoutSealTest extends AbstractViewTest {
      */
     @Test
     public void successfulQuorumSeal() {
-        RuntimeLayout runtimeLayout = getRuntimeLayout(Layout.ReplicationMode.QUORUM_REPLICATION);
+        RuntimeLayout runtimeLayout = getRuntimeLayout(Layout.ReplicationMode.CHAIN_REPLICATION);
         Layout l = runtimeLayout.getLayout();
         l.setEpoch(l.getEpoch() + 1);
         try {
@@ -174,28 +174,5 @@ public class LayoutSealTest extends AbstractViewTest {
         }
         assertLayoutEpochs(2, 2, 2);
         assertServerRouterEpochs(2, 2, 2, 2, 2);
-    }
-
-    /**
-     * Scenario: 5 Servers.
-     * ENDPOINT_3 failed and attempted to seal.
-     * LayoutServers quorum is possible,    -   Seal passes
-     * Stripe 1: 0 failed, 3 responses.     -   Seal passes
-     * Stripe 2: 1 failed, 1 response.      -   Seal failed (Quorum not possible)
-     * Seal failed
-     */
-    @Test
-    public void failingQuorumSeal() {
-        RuntimeLayout runtimeLayout = getRuntimeLayout(Layout.ReplicationMode.QUORUM_REPLICATION);
-        Layout l = runtimeLayout.getLayout();
-
-        addClientRule(runtimeLayout.getRuntime(), SERVERS.ENDPOINT_3,
-                new TestRule().drop().always());
-
-        l.setEpoch(l.getEpoch() + 1);
-        assertThatThrownBy(runtimeLayout::sealMinServerSet)
-                .isInstanceOf(QuorumUnreachableException.class);
-        assertLayoutEpochs(2, 2, 2);
-        assertServerRouterEpochs(2, 2, 2, 1, 2);
     }
 }

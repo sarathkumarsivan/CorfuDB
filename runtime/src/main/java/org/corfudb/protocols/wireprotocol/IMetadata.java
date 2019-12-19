@@ -60,34 +60,6 @@ public interface IMetadata {
         return  getBackpointerMap().keySet().contains(stream);
     }
 
-    /**
-     * Get the rank of this append.
-     *
-     * @return The rank of this append.
-     */
-    @SuppressWarnings("unchecked")
-    @Nullable
-    default DataRank getRank() {
-        return (DataRank) getMetadataMap().getOrDefault(LogUnitMetadataType.RANK,
-                null);
-    }
-
-    /**
-     * Set the rank of this append.
-     *
-     * @param rank The rank of this append.
-     */
-    default void setRank(@Nullable DataRank rank) {
-        EnumMap<LogUnitMetadataType, Object> map = getMetadataMap();
-        if (rank != null) {
-            map.put(LogUnitMetadataType.RANK, rank);
-        } else {
-            if (map.containsKey(LogUnitMetadataType.RANK)) {
-                map.remove(LogUnitMetadataType.RANK);
-            }
-        }
-    }
-
     @SuppressWarnings("unchecked")
     default Map<UUID, Long> getBackpointerMap() {
         return (Map<UUID, Long>) getMetadataMap().getOrDefault(LogUnitMetadataType.BACKPOINTER_MAP,
@@ -208,7 +180,6 @@ public interface IMetadata {
 
     @RequiredArgsConstructor
     enum LogUnitMetadataType implements ITypedEnum {
-        RANK(1, TypeToken.of(DataRank.class)),
         BACKPOINTER_MAP(3, new TypeToken<Map<UUID, Long>>() {}),
         GLOBAL_ADDRESS(4, TypeToken.of(Long.class)),
         CHECKPOINT_TYPE(6, TypeToken.of(CheckpointEntry.CheckpointEntryType.class)),
@@ -232,32 +203,4 @@ public interface IMetadata {
                         .collect(Collectors.toMap(LogUnitMetadataType::asByte,
                                 Function.identity()));
     }
-
-    @Value
-    @AllArgsConstructor
-    class DataRank implements Comparable<DataRank> {
-        public long rank;
-        @NotNull
-        public UUID uuid;
-
-        public DataRank(long rank) {
-            this(rank, UUID.randomUUID());
-        }
-
-        public DataRank buildHigherRank() {
-            return new DataRank(rank + 1, uuid);
-        }
-
-        @Override
-        public int compareTo(DataRank o) {
-            int rankCompared = Long.compare(this.rank, o.rank);
-            if (rankCompared == 0) {
-                return uuid.compareTo(o.getUuid());
-            } else {
-                return rankCompared;
-            }
-        }
-    }
-
-
 }

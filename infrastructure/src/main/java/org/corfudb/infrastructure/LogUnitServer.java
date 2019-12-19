@@ -31,7 +31,6 @@ import org.corfudb.runtime.exceptions.DataOutrankedException;
 import org.corfudb.runtime.exceptions.LogUnitException;
 import org.corfudb.runtime.exceptions.OverwriteException;
 import org.corfudb.runtime.exceptions.TrimmedException;
-import org.corfudb.runtime.exceptions.ValueAdoptedException;
 import org.corfudb.runtime.exceptions.WrongEpochException;
 import org.corfudb.runtime.view.stream.StreamAddressSpace;
 import org.corfudb.util.Utils;
@@ -194,11 +193,6 @@ public class LogUnitServer extends AbstractServer {
             OverwriteException owe = (OverwriteException) ex.getCause();
             r.sendResponse(ctx, msg, CorfuMsgType.ERROR_OVERWRITE
                     .payloadMsg(owe.getOverWriteCause().getId()));
-        } else if (ex.getCause() instanceof DataOutrankedException) {
-            r.sendResponse(ctx, msg, CorfuMsgType.ERROR_DATA_OUTRANKED.msg());
-        } else if (ex.getCause() instanceof ValueAdoptedException) {
-            ValueAdoptedException vae = (ValueAdoptedException) ex.getCause();
-            r.sendResponse(ctx, msg, CorfuMsgType.ERROR_VALUE_ADOPTED.payloadMsg(vae.getReadResponse()));
         } else if (ex.getCause() instanceof TrimmedException) {
             r.sendResponse(ctx, msg, CorfuMsgType.ERROR_TRIMMED.msg());
         } else {

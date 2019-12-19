@@ -3,7 +3,6 @@ package org.corfudb.protocols.wireprotocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.corfudb.protocols.logprotocol.CheckpointEntry.CheckpointEntryType;
-import org.corfudb.protocols.wireprotocol.IMetadata.DataRank;
 import org.corfudb.runtime.view.Layout;
 import org.junit.Test;
 
@@ -22,7 +21,7 @@ public class ICorfuPayloadTest {
     public void checkConstructorMap() {
         List<Class<?>> types = Arrays.asList(
                 Byte.class, Integer.class, Long.class, Boolean.class, Double.class, Float.class, String.class,
-                Layout.class, DataRank.class, CheckpointEntryType.class, UUID.class, byte[].class, ByteBuf.class
+                Layout.class, CheckpointEntryType.class, UUID.class, byte[].class, ByteBuf.class
         );
 
         assertThat(ICorfuPayload.constructorMap.keySet()).containsAll(types);

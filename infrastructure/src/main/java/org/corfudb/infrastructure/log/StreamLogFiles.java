@@ -73,7 +73,7 @@ import static org.corfudb.infrastructure.utils.Persistence.syncDirectory;
  */
 
 @Slf4j
-public class StreamLogFiles implements StreamLog, StreamLogWithRankedAddressSpace {
+public class StreamLogFiles implements StreamLog {
 
     public static final int METADATA_SIZE = Metadata.newBuilder()
             .setLengthChecksum(-1)
@@ -444,7 +444,6 @@ public class StreamLogFiles implements StreamLog, StreamLogWithRankedAddressSpac
 
         logData.setBackpointerMap(getUUIDLongMap(entry.getBackpointersMap()));
         logData.setGlobalAddress(entry.getGlobalAddress());
-        logData.setRank(createDataRank(entry));
 
         if (entry.hasThreadId()) {
             logData.setThreadId(entry.getThreadId());
@@ -844,9 +843,6 @@ public class StreamLogFiles implements StreamLog, StreamLogWithRankedAddressSpac
                 .addAllStreams(getStrUUID(entry.getStreams()))
                 .putAllBackpointers(getStrLongMap(entry.getBackpointerMap()));
 
-        Optional<Types.DataRank> rank = createProtobufsDataRank(entry);
-        rank.ifPresent(logEntryBuilder::setRank);
-
         if (entry.getClientId() != null && entry.getThreadId() != null) {
             logEntryBuilder.setClientIdMostSignificant(
                     entry.getClientId().getMostSignificantBits());
@@ -872,29 +868,6 @@ public class StreamLogFiles implements StreamLog, StreamLogWithRankedAddressSpac
         }
 
         return logEntryBuilder.build();
-    }
-
-    private Optional<Types.DataRank> createProtobufsDataRank(IMetadata entry) {
-        IMetadata.DataRank rank = entry.getRank();
-        if (rank == null) {
-            return Optional.empty();
-        }
-        Types.DataRank result = Types.DataRank.newBuilder()
-                .setRank(rank.getRank())
-                .setUuidLeastSignificant(rank.getUuid().getLeastSignificantBits())
-                .setUuidMostSignificant(rank.getUuid().getMostSignificantBits())
-                .build();
-        return Optional.of(result);
-    }
-
-    @Nullable
-    private IMetadata.DataRank createDataRank(LogEntry entity) {
-        if (!entity.hasRank()) {
-            return null;
-        }
-        Types.DataRank rank = entity.getRank();
-        return new IMetadata.DataRank(rank.getRank(),
-                new UUID(rank.getUuidMostSignificant(), rank.getUuidLeastSignificant()));
     }
 
     /**
@@ -1160,16 +1133,9 @@ public class StreamLogFiles implements StreamLog, StreamLogWithRankedAddressSpac
             // (probably need a faster way to do this - high watermark?)
             if (segment.getKnownAddresses().containsKey(address)
                     || segment.getTrimmedAddresses().contains(address)) {
-                if (entry.getRank() == null) {
-                    OverwriteCause overwriteCause = getOverwriteCauseForAddress(address, entry);
-                    log.trace("Disk_write[{}]: overwritten exception, cause: {}", address, overwriteCause);
-                    throw new OverwriteException(overwriteCause);
-                } else {
-                    // the method below might throw DataOutrankedException or ValueAdoptedException
-                    assertAppendPermittedUnsafe(address, entry);
-                    AddressMetaData addressMetaData = writeRecord(segment, address, entry);
-                    segment.getKnownAddresses().put(address, addressMetaData);
-                }
+                OverwriteCause overwriteCause = getOverwriteCauseForAddress(address, entry);
+                log.trace("Disk_write[{}]: overwritten exception, cause: {}", address, overwriteCause);
+                throw new OverwriteException(overwriteCause);
             } else {
                 AddressMetaData addressMetaData = writeRecord(segment, address, entry);
                 segment.getKnownAddresses().put(address, addressMetaData);

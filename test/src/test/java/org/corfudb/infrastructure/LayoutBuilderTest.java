@@ -44,7 +44,7 @@ public class LayoutBuilderTest extends AbstractCorfuTest {
                 .addSequencer(SERVERS.PORT_1)
                 .addSequencer(SERVERS.PORT_2)
                 .buildSegment()
-                .setReplicationMode(ReplicationMode.QUORUM_REPLICATION)
+                .setReplicationMode(ReplicationMode.CHAIN_REPLICATION)
                 .buildStripe()
                 .addLogUnit(SERVERS.PORT_0)
                 .addLogUnit(SERVERS.PORT_2)
@@ -71,7 +71,6 @@ public class LayoutBuilderTest extends AbstractCorfuTest {
         //Preparing failed nodes set.
         failedNodes.addAll(allNodes);
 
-
         /*
          * Invalid Removals
          */
@@ -92,6 +91,7 @@ public class LayoutBuilderTest extends AbstractCorfuTest {
         failedNodes.clear();
         failedNodes.add(allNodes.get(0));
         failedNodes.add(allNodes.get(2));
+        failedNodes.add(allNodes.get(3));
         assertThatThrownBy(() -> layoutBuilder.removeLogunitServers(failedNodes).build())
                 .isInstanceOf(LayoutModificationException.class);
 
@@ -110,7 +110,7 @@ public class LayoutBuilderTest extends AbstractCorfuTest {
                 .addSequencer(SERVERS.PORT_1)
                 .addSequencer(SERVERS.PORT_2)
                 .buildSegment()
-                .setReplicationMode(ReplicationMode.QUORUM_REPLICATION)
+                .setReplicationMode(ReplicationMode.CHAIN_REPLICATION)
                 .buildStripe()
                 .addLogUnit(SERVERS.PORT_2)
                 .addLogUnit(SERVERS.PORT_3)
@@ -139,7 +139,7 @@ public class LayoutBuilderTest extends AbstractCorfuTest {
                 .addLayoutServer(SERVERS.PORT_3)
                 .addSequencer(SERVERS.PORT_2)
                 .buildSegment()
-                .setReplicationMode(ReplicationMode.QUORUM_REPLICATION)
+                .setReplicationMode(ReplicationMode.CHAIN_REPLICATION)
                 .buildStripe()
                 .addLogUnit(SERVERS.PORT_2)
                 .addLogUnit(SERVERS.PORT_3)
@@ -175,15 +175,7 @@ public class LayoutBuilderTest extends AbstractCorfuTest {
         // Remove SERVERS.PORT_2 from sequencer server should throw error.
         assertThatThrownBy(() -> layoutBuilder.removeSequencerServer(allNodes.get(2)))
                 .isInstanceOf(LayoutModificationException.class);
-
-        // Reject remove if redundancy is lost
-        assertThatThrownBy(() -> layoutBuilder.removeLogunitServer(allNodes.get(1)))
-                .isInstanceOf(LayoutModificationException.class);
-
-        // Reject remove if stripe size is one
-        assertThatThrownBy(() -> layoutBuilder.removeLogunitServer(allNodes.get(2)))
-                .isInstanceOf(LayoutModificationException.class);
-
+        
         // Assert the resulting layout is equal to the expected
         assertThat(layoutBuilder.build()).isEqualTo(expectedLayout);
     }
@@ -202,7 +194,7 @@ public class LayoutBuilderTest extends AbstractCorfuTest {
                 .addSequencer(SERVERS.PORT_1)
                 .addSequencer(SERVERS.PORT_2)
                 .buildSegment()
-                .setReplicationMode(ReplicationMode.QUORUM_REPLICATION)
+                .setReplicationMode(ReplicationMode.CHAIN_REPLICATION)
                 .buildStripe()
                 .addLogUnit(SERVERS.PORT_0)
                 .addLogUnit(SERVERS.PORT_2)

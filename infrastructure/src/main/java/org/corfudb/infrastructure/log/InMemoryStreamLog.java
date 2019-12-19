@@ -23,7 +23,7 @@ import org.corfudb.runtime.exceptions.OverwriteException;
  * Created by maithem on 7/21/16.
  */
 @Slf4j
-public class InMemoryStreamLog implements StreamLog, StreamLogWithRankedAddressSpace {
+public class InMemoryStreamLog implements StreamLog {
 
     private Map<Long, LogData> logCache;
     private final Set<Long> trimmed;
@@ -115,14 +115,9 @@ public class InMemoryStreamLog implements StreamLog, StreamLogWithRankedAddressS
     }
 
     private void throwLogUnitExceptionsIfNecessary(long address, LogData entry) {
-        if (entry.getRank() == null) {
-            OverwriteCause overwriteCause = getOverwriteCauseForAddress(address, entry);
-            log.trace("throwLogUnitExceptionsIfNecessary: overwritten exception for address {}, cause: {}", address, overwriteCause);
-            throw new OverwriteException(overwriteCause);
-        } else {
-            // the method below might throw DataOutrankedException or ValueAdoptedException
-            assertAppendPermittedUnsafe(address, entry);
-        }
+        OverwriteCause overwriteCause = getOverwriteCauseForAddress(address, entry);
+        log.trace("throwLogUnitExceptionsIfNecessary: overwritten exception for address {}, cause: {}", address, overwriteCause);
+        throw new OverwriteException(overwriteCause);
     }
 
     /**

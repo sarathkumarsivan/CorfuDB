@@ -413,34 +413,6 @@ public class FastObjectLoaderTest extends AbstractViewTest {
         assertThat(streamTails.size()).isEqualTo(mapCount * 2);
     }
 
-    @Test
-    public void canReadRankOnlyEntries() throws Exception {
-        populateMaps(1, getDefaultRuntime(), CorfuTable.class, true, 2);
-
-        LogUnitClient luc = getDefaultRuntime().getLayoutView().getRuntimeLayout()
-                .getLogUnitClient(getDefaultConfigurationString());
-        SequencerClient seq = getDefaultRuntime().getLayoutView().getRuntimeLayout()
-                .getSequencerClient(getDefaultConfigurationString());
-
-        long address = seq.nextToken(Collections.emptyList(),1).get().getSequence();
-        ILogData data = Helpers.createEmptyData(address, DataType.RANK_ONLY,  new IMetadata.DataRank(2))
-                .getSerialized();
-        luc.write(data).get();
-
-        populateMaps(1, getDefaultRuntime(), CorfuTable.class, false, 1);
-
-        address = seq.nextToken(Collections.emptyList(),1).get().getSequence();
-        data = Helpers.createEmptyData(address, DataType.RANK_ONLY,  new IMetadata.DataRank(2))
-                .getSerialized();
-        luc.write(data).get();
-
-        populateMaps(1, getDefaultRuntime(), CorfuTable.class, false, 1);
-
-        CorfuRuntime rt2 = Helpers.createNewRuntimeWithFastLoader(getDefaultConfigurationString());
-        assertThatMapsAreBuilt(rt2);
-        assertThatObjectCacheIsTheSameSize(getDefaultRuntime(), rt2);
-    }
-
     /**
      * Interleaving checkpoint entries and normal entries through multithreading
      *

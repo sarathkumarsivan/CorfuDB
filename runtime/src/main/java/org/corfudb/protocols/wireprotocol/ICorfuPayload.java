@@ -12,7 +12,6 @@ import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.ByteBufOutputStream;
 import io.netty.buffer.Unpooled;
 import org.corfudb.protocols.logprotocol.CheckpointEntry.CheckpointEntryType;
-import org.corfudb.protocols.wireprotocol.IMetadata.DataRank;
 import org.corfudb.runtime.exceptions.SerializerException;
 import org.corfudb.runtime.view.Layout;
 import org.corfudb.runtime.view.stream.StreamAddressSpace;
@@ -67,7 +66,6 @@ public interface ICorfuPayload<T> {
                         String str = new String(byteArray, StandardCharsets.UTF_8);
                         return JsonUtils.parser.fromJson(str, Layout.class);
                     })
-                    .put(DataRank.class, x -> new DataRank(x.readLong(), new UUID(x.readLong(), x.readLong())))
                     .put(CheckpointEntryType.class, x -> CheckpointEntryType.typeMap.get(x.readByte()))
                     .put(UUID.class, x -> new UUID(x.readLong(), x.readLong()))
                     .put(byte[].class, x -> {
@@ -359,11 +357,6 @@ public interface ICorfuPayload<T> {
             int bytes = b.readableBytes();
             buffer.writeInt(bytes);
             buffer.writeBytes(b, bytes);
-        } else if (payload instanceof DataRank) {
-            DataRank rank = (DataRank) payload;
-            buffer.writeLong(rank.getRank());
-            buffer.writeLong(rank.getUuid().getMostSignificantBits());
-            buffer.writeLong(rank.getUuid().getLeastSignificantBits());
         } else if (payload instanceof CheckpointEntryType) {
             buffer.writeByte(((CheckpointEntryType) payload).asByte());
         } else if (payload instanceof PriorityLevel) {

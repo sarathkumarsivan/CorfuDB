@@ -19,7 +19,6 @@ import org.corfudb.runtime.exceptions.OutOfSpaceException;
 import org.corfudb.runtime.exceptions.OverwriteCause;
 import org.corfudb.runtime.exceptions.OverwriteException;
 import org.corfudb.runtime.exceptions.TrimmedException;
-import org.corfudb.runtime.exceptions.ValueAdoptedException;
 
 
 /**
@@ -85,35 +84,6 @@ public class LogUnitHandler implements IClient, IHandler<LogUnitClient> {
     private static Object handleOverwrite(CorfuPayloadMsg<Integer> msg, ChannelHandlerContext ctx, IClientRouter r)
             throws Exception {
         throw new OverwriteException(OverwriteCause.fromId(msg.getPayload()));
-    }
-
-    /**
-     * Handle an ERROR_DATA_OUTRANKED message.
-     *
-     * @param msg Incoming Message
-     * @param ctx Context
-     * @param r   Router
-     * @throws OverwriteException Throws OverwriteException if write has been outranked.
-     */
-    @ClientHandler(type = CorfuMsgType.ERROR_DATA_OUTRANKED)
-    private static Object handleDataOutranked(CorfuMsg msg,
-                                              ChannelHandlerContext ctx, IClientRouter r)
-            throws Exception {
-        throw new DataOutrankedException();
-    }
-
-
-    /**
-     * Handle an ERROR_VALUE_ADOPTED message.
-     *
-     * @param msg Incoming Message
-     * @param ctx Context
-     * @param r   Router
-     */
-    @ClientHandler(type = CorfuMsgType.ERROR_VALUE_ADOPTED)
-    private static Object handleValueAdoptedResponse(CorfuPayloadMsg<ReadResponse> msg,
-                                                     ChannelHandlerContext ctx, IClientRouter r) {
-        throw new ValueAdoptedException(msg.getPayload());
     }
 
     /**

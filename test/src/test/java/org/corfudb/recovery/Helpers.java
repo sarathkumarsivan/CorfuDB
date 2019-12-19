@@ -23,9 +23,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Created by rmichoud on 10/23/17.
  */
 public class Helpers{
-    static ILogData.SerializationHandle createEmptyData(long position, DataType type, IMetadata.DataRank rank) {
+    static ILogData.SerializationHandle createEmptyData(long position, DataType type) {
         ILogData data = new LogData(type);
-        data.setRank(rank);
         data.setGlobalAddress(position);
         return data.getSerializedForm();
     }
